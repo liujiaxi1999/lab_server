@@ -96,5 +96,5 @@ du -h --max-depth=1
 ```
 
 
-### 4. [GPU cuda 环境搭建](./gpu_cuda.md)
-### 5. 网络管理
+## 4. [GPU cuda 环境搭建](./gpu_cuda.md)
+
