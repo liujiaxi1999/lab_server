@@ -1,4 +1,7 @@
 # 620 lab server
+
+该文档最早由何泽文师兄（github账号hedes建立），现在由曲宇勋，孙孟轩等人维护，旨在帮助大家更好地使用人工智能与机器学习团队的服务器资源。
+
 ## 1. 服务器使用
 ### 1.1 [现有服务器](./server_list.md)
 
@@ -36,11 +39,62 @@ ln -s /media/zhangsan/projects /home/zhangsan/
 * 对624用户来说，因为无法访问外网，所以需要配置 http_proxy等变量，同样参考本项目的bashrc即可
 * vim 打开，修改，保存退出后, `source ~/.bashrc` 即完成新变量的加载
 ## 2. [git 使用](./git_tutorial.md)
-## 3. 服务器管理
-1. 新用户添加
+## 3. 服务器管理（管理员须知）
+如果你是某台服务器的管理员，在你的用户下输入``sudo su``即可进入管理员模式，你应该要知道以下管理细节。
+### 3.1 服务器网络配置
+适用于新进服务器，新进服务器要配置新IP，需要先在服务器中设置网卡信息。
+- 查看网卡情况
+![image](https://user-images.githubusercontent.com/56111463/162695629-3088ad95-f401-4283-86fb-179250ce0ae9.png)
+    输入ifconfig可以查看当前服务器网卡情况，一台服务器会有多个网卡接口，记录一下插着网线的网卡号，如图中的ens12f0卡，有实时的RX与TX，就是插着网线的网卡，请对该网卡配置IP。
+- 进入网卡配置文件
+    以centOS系统为例，进入centOS系统的配置文件路径
+```
+cd /etc/sysconfig/network-scripts/
+vi ifcfg-ens12f0
+```
+- 配置IP，模式楼服务器可参考以下配置
+```
+TYPE=Ethernet
+PROXY_METHOD=none
+BROWSER_ONLY=no
+BOOTPROTO=static
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
+IPV6INIT=yes
+IPV6_AUTOCONF=yes
+IPV6_DEFROUTE=yes
+IPV6_FAILURE_FATAL=no
+IPV6_ADDR_GEN_MODE=stable-privacy
+NAME=ens12f0
+UUID=c39a9ae4-ced5-4651-a367-6d11f0a63fa7
+DEVICE=ens12f0
+ONBOOT=yes
+IPADDR=172.18.116.33
+PREFIX=24
+GATEWAY=172.18.116.254
+
+DNS1=172.18.50.3
+```
+### 3.2 新用户添加
 - 使用命令来添加用户 zhangsan
     管理员完成`sudo adduser zhangsan` 后续按照提示输入选好的密码
 - 将 zhangsan 加入ssh白名单,以备ssh访问
     管理员完成`sudo vim /etc/ssh/sshd_config` 在内部添加 zhangsan 即可
+### 3.3 重启后操作
+在持久模式下运行的显卡访问起来更加高效快速，所以重启之后请开启持久模式。
+```
+nvidia-smi -pm 1
+```
+### 3.4 空间已满如何操作
+首先通过df -h操作查看当前服务器的存储分布，可能满的有两个空间，一个是home目录，一个是根目录。
+- 根目录满了怎么办
+    根目录清理建议前往/var/crash/目录下，该目录下的文件来自于服务器崩溃时的内存备份，可以删除一些较早的文件。删除文件需要管理员权限，删除时请务必小心，切勿删库跑路。
+- home目录满了怎么办
+    利用管理员权限前往home目录下，输入以下命令。可以显示出home下每个成员的占用空间，请定期检查并通知占用过多的用户清理其home文件。
+```
+du -h --max-depth=1
+```
+
+
 ### 4. [GPU cuda 环境搭建](./gpu_cuda.md)
 ### 5. 网络管理
