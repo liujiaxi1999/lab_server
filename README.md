@@ -35,7 +35,6 @@ ln -s /media/zhangsan/projects /home/zhangsan/
 * 这其中用于配置个人的系统变量
     - PATH：系统路径
     - LD_LIBRARY_PATH：动态库路径
-    - 等
 * 对624用户来说，因为无法访问外网，所以需要配置 http_proxy等变量，同样参考本项目的bashrc即可
 * vim 打开，修改，保存退出后, `source ~/.bashrc` 即完成新变量的加载
 ## 2. [git 使用](./git_tutorial.md)
