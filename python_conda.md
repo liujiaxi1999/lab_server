@@ -8,3 +8,4 @@
     - conda [清华源配置方法](https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/)
     - pip [清华源配置方法](https://mirror.tuna.tsinghua.edu.cn/help/pypi/)
     - 也可以选择中科大ustc和aliyun的源
+* (2022.7.5 AsceticMonk添加)在conda源配置之后，在创建环境的时候，可能会出现HTTPERROR，此时将.condarc内部所有网址的https修改为http既可。
