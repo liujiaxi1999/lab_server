@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>科研日常工作时间表</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    /* ── Header ── */
+    header {
+      max-width: 860px;
+      margin: 0 auto 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .header-left p {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 3px;
+    }
+
+    .date-badge {
+      background: #fff;
+      border: 1px solid #e0e4ea;
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      color: #444;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+
+    .date-badge span {
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      max-width: 860px;
+      margin: 0 auto 28px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.07);
+      border: 1px solid #e8ebf0;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .progress-label strong { color: #1a1a2e; }
+
+    .progress-bar {
+      height: 8px;
+      background: #eef0f4;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #4f8ef7, #7b5ea7);
+      transition: width 1s ease;
+    }
+
+    /* ── Schedule grid ── */
+    .schedule {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ── Section label (Morning / Afternoon / Evening) ── */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #999;
+      padding: 4px 0 2px;
+      border-bottom: 1px solid #e4e7ed;
+      margin-top: 8px;
+    }
+
+    /* ── Single block ── */
+    .block {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #e8ebf0;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+      transition: box-shadow .2s, transform .15s;
+      position: relative;
+    }
+
+    .block:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
+      transform: translateY(-1px);
+    }
+
+    /* Active / past / upcoming states */
+    .block.active {
+      border-color: #4f8ef7;
+      box-shadow: 0 0 0 2px rgba(79,142,247,.25), 0 4px 16px rgba(79,142,247,.15);
+    }
+
+    .block.past { opacity: .58; }
+
+    /* Accent left bar */
+    .block::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--accent);
+      border-radius: 12px 0 0 12px;
+    }
+
+    /* Time column */
+    .block-time {
+      padding: 14px 12px 14px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-right: 1px solid #f0f2f5;
+    }
+
+    .block-time .start {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .block-time .end {
+      font-size: 0.75rem;
+      color: #999;
+      margin-top: 2px;
+    }
+
+    .block-time .duration {
+      margin-top: 6px;
+      font-size: 0.68rem;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 6px;
+      padding: 2px 6px;
+      display: inline-block;
+      font-weight: 600;
+    }
+
+    /* Content column */
+    .block-content {
+      padding: 14px 16px;
+    }
+
+    .block-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .block-icon {
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+
+    .block-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .active-pill {
+      font-size: 0.65rem;
+      font-weight: 700;
+      background: #4f8ef7;
+      color: #fff;
+      border-radius: 99px;
+      padding: 2px 8px;
+      letter-spacing: .04em;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .55; }
+    }
+
+    .block-desc {
+      font-size: 0.8rem;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .block-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      font-size: 0.68rem;
+      border-radius: 6px;
+      padding: 2px 8px;
+      background: #f2f4f8;
+      color: #555;
+      font-weight: 500;
+    }
+
+    /* Color themes */
+    .theme-blue   { --accent: #4f8ef7; --accent-light: #eaf0ff; }
+    .theme-green  { --accent: #34b27e; --accent-light: #e6f7f0; }
+    .theme-purple { --accent: #7b5ea7; --accent-light: #f0eaf8; }
+    .theme-orange { --accent: #f09140; --accent-light: #fef3e6; }
+    .theme-teal   { --accent: #2bbcbb; --accent-light: #e4f8f8; }
+    .theme-pink   { --accent: #e05c8a; --accent-light: #fde8f1; }
+    .theme-gray   { --accent: #8a94a6; --accent-light: #f2f3f6; }
+
+    /* ── Clock ── */
+    .clock {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      max-width: 860px;
+      margin: 32px auto 0;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #bbb;
+    }
+
+    @media (max-width: 480px) {
+      .block { grid-template-columns: 82px 1fr; }
+      .block-time { padding: 12px 8px 12px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>科研日常工作时间表</h1>
+    <p id="greeting">今天也是充实的一天 ✨</p>
+  </div>
+  <div class="date-badge">
+    <span id="today-date">--</span> &nbsp;|&nbsp; <span id="today-weekday">--</span>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span>工作日进度</span>
+    <strong id="progress-text">--</strong>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="schedule" id="schedule"></div>
+
+<footer>科研日常 · 保持专注，稳步前进</footer>
+
+<script>
+  // ── Schedule data ──────────────────────────────────────────────
+  const blocks = [
+    {
+      start: "07:00", end: "07:30",
+      icon: "🌅", title: "起床 & 晨间准备",
+      desc: "洗漱、早餐，快速浏览今日任务清单，调整心态迎接新的一天。",
+      tags: ["早餐", "任务回顾"],
+      theme: "theme-orange", section: "morning"
+    },
+    {
+      start: "07:30", end: "09:00",
+      icon: "📰", title: "文献阅读",
+      desc: "精读 1–2 篇领域最新论文，做笔记，标注关键方法和创新点。",
+      tags: ["阅读", "笔记", "Zotero"],
+      theme: "theme-blue", section: null
+    },
+    {
+      start: "09:00", end: "09:15",
+      icon: "☕", title: "短休 & 咖啡",
+      desc: "放松眼睛，起身活动，准备进入深度工作状态。",
+      tags: ["休息"],
+      theme: "theme-gray", section: null
+    },
+    {
+      start: "09:15", end: "12:00",
+      icon: "🧪", title: "核心实验 / 代码开发",
+      desc: "专注时间，不查消息。运行实验、调试代码、分析结果，记录每次实验的参数和产出。",
+      tags: ["Deep Work", "实验", "Python", "GPU"],
+      theme: "theme-purple", section: null
+    },
+    {
+      start: "12:00", end: "13:30",
+      icon: "🍱", title: "午餐 & 午休",
+      desc: "吃饭放松，午休 20–30 分钟，补充精力迎接下午。",
+      tags: ["午饭", "午休"],
+      theme: "theme-green", section: "afternoon"
+    },
+    {
+      start: "13:30", end: "15:00",
+      icon: "📊", title: "数据分析 & 可视化",
+      desc: "处理实验数据，绘制图表，撰写实验记录或更新进展文档。",
+      tags: ["分析", "matplotlib", "报告"],
+      theme: "theme-teal", section: null
+    },
+    {
+      start: "15:00", end: "16:00",
+      icon: "👥", title: "组会 / 讨论",
+      desc: "与导师或组员同步进展，汇报问题，讨论下一步方向（非每日，可替换为自习）。",
+      tags: ["组会", "交流", "反馈"],
+      theme: "theme-pink", section: null
+    },
+    {
+      start: "16:00", end: "17:30",
+      icon: "✍️", title: "论文写作 / 修改",
+      desc: "专注写作：背景、方法、实验或讨论章节；或修改审稿意见，打磨语言表达。",
+      tags: ["写作", "LaTeX", "论文"],
+      theme: "theme-blue", section: null
+    },
+    {
+      start: "17:30", end: "18:00",
+      icon: "📝", title: "日志整理 & 明日计划",
+      desc: "记录今日完成事项、遇到的问题及解决思路，列出明日 Top-3 优先任务。",
+      tags: ["日志", "复盘", "计划"],
+      theme: "theme-orange", section: null
+    },
+    {
+      start: "18:00", end: "19:30",
+      icon: "🏃", title: "晚餐 & 运动",
+      desc: "吃饭，然后跑步、健身或散步 30–45 分钟，保持身体状态。",
+      tags: ["晚饭", "运动"],
+      theme: "theme-green", section: "evening"
+    },
+    {
+      start: "19:30", end: "21:00",
+      icon: "📚", title: "自由学习时间",
+      desc: "泛读综述、看技术博客、学新工具，或处理轻量级任务，不强迫自己高强度工作。",
+      tags: ["学习", "综述", "工具"],
+      theme: "theme-teal", section: null
+    },
+    {
+      start: "21:00", end: "22:00",
+      icon: "🌙", title: "放松 & 准备就寝",
+      desc: "远离屏幕，阅读课外书、冥想或听音乐，保证充足睡眠。",
+      tags: ["休息", "睡前"],
+      theme: "theme-gray", section: null
+    },
+  ];
+
+  // ── Helpers ────────────────────────────────────────────────────
+  function toMinutes(t) {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  function fmt(d) {
+    return d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function durLabel(start, end) {
+    const d = toMinutes(end) - toMinutes(start);
+    const h = Math.floor(d / 60), m = d % 60;
+    return h > 0 ? (m > 0 ? `${h}h${m}m` : `${h}h`) : `${m}m`;
+  }
+
+  // ── Render ─────────────────────────────────────────────────────
+  const sectionNames = { morning: "🌤 上午", afternoon: "☀️ 下午", evening: "🌙 晚间" };
+
+  function render(nowMin) {
+    const container = document.getElementById("schedule");
+    container.innerHTML = "";
+
+    blocks.forEach(b => {
+      const s = toMinutes(b.start), e = toMinutes(b.end);
+      const isPast   = nowMin >= e;
+      const isActive = nowMin >= s && nowMin < e;
+
+      // Section divider
+      if (b.section) {
+        const lbl = document.createElement("div");
+        lbl.className = "section-label";
+        lbl.textContent = sectionNames[b.section];
+        container.appendChild(lbl);
+      }
+
+      const el = document.createElement("div");
+      el.className = `block ${b.theme}${isPast ? " past" : ""}${isActive ? " active" : ""}`;
+
+      el.innerHTML = `
+        <div class="block-time">
+          <div class="start">${b.start}</div>
+          <div class="end">${b.end}</div>
+          <div class="duration">${durLabel(b.start, b.end)}</div>
+        </div>
+        <div class="block-content">
+          <div class="block-header">
+            <span class="block-icon">${b.icon}</span>
+            <span class="block-title">${b.title}</span>
+            ${isActive ? '<span class="active-pill">进行中</span>' : ""}
+          </div>
+          <div class="block-desc">${b.desc}</div>
+          <div class="block-tags">${b.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+        </div>`;
+
+      container.appendChild(el);
+
+      if (isActive) {
+        requestAnimationFrame(() => el.scrollIntoView({ behavior: "smooth", block: "center" }));
+      }
+    });
+  }
+
+  // ── Progress bar ───────────────────────────────────────────────
+  const WORK_START = toMinutes("07:00");
+  const WORK_END   = toMinutes("22:00");
+
+  function updateProgress(nowMin) {
+    const pct = Math.min(100, Math.max(0,
+      ((nowMin - WORK_START) / (WORK_END - WORK_START)) * 100
+    ));
+    document.getElementById("progress-fill").style.width = pct.toFixed(1) + "%";
+    document.getElementById("progress-text").textContent = pct.toFixed(0) + "%";
+  }
+
+  // ── Date & greeting ────────────────────────────────────────────
+  function updateDate() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" });
+    const weekday = now.toLocaleDateString("zh-CN", { weekday: "long" });
+    document.getElementById("today-date").textContent = dateStr;
+    document.getElementById("today-weekday").textContent = weekday;
+
+    const h = now.getHours();
+    const greetings = [
+      [6,  "早上好，新的一天开始了 ☀️"],
+      [9,  "上午好，进入专注状态 🔬"],
+      [12, "上午辛苦了，去吃个午饭吧 🍱"],
+      [14, "下午好，保持节奏 💪"],
+      [18, "傍晚了，是时候活动一下 🏃"],
+      [21, "晚上好，今天做得不错 🌙"],
+      [24, "夜深了，注意休息 💤"],
+    ];
+    const g = greetings.find(([hour]) => h < hour);
+    document.getElementById("greeting").textContent = g ? g[1] : "今天也是充实的一天 ✨";
+  }
+
+  // ── Tick ───────────────────────────────────────────────────────
+  function tick() {
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    updateDate();
+    updateProgress(nowMin);
+    render(nowMin);
+  }
+
+  tick();
+  setInterval(tick, 60 * 1000); // refresh every minute
+</script>
+</body>
+</html>
